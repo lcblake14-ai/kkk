@@ -1,4 +1,4 @@
--- Script seguro para executor: congela jogadores no Roblox
+-- Script seguro: faz jogador seguir você (ficar na sua frente)
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
@@ -19,7 +19,7 @@ end
 
 -- Criar GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "FreezeGui"
+ScreenGui.Name = "FollowGui"
 ScreenGui.Parent = playerGui
 
 local Frame = Instance.new("Frame", ScreenGui)
@@ -29,7 +29,7 @@ Frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 Frame.BackgroundTransparency = 0.1
 
 local Title = Instance.new("TextLabel", Frame)
-Title.Text = "Freeze Test"
+Title.Text = "Follow Test"
 Title.Size = UDim2.new(1, 0, 0, 30)
 Title.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -63,10 +63,19 @@ local function updatePlayerList()
 
             btn.MouseButton1Click:Connect(function()
                 local character = plr.Character
-                if character and character:FindFirstChild("HumanoidRootPart") then
-                    -- Congela o jogador
-                    character.HumanoidRootPart.Anchored = true
-                    print("[FREEZE] "..plr.Name.." foi congelado para teste.")
+                local myChar = player.Character
+                if character and character:FindFirstChild("HumanoidRootPart") and myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                    print("[FOLLOW] "..plr.Name.." agora vai ficar na sua frente.")
+                    -- Teletransporta o jogador repetidamente para frente de você
+                    local followConnection
+                    followConnection = game:GetService("RunService").RenderStepped:Connect(function()
+                        if character.Parent and myChar.Parent then
+                            local offset = myChar.HumanoidRootPart.CFrame.LookVector * 3
+                            character.HumanoidRootPart.CFrame = myChar.HumanoidRootPart.CFrame + offset
+                        else
+                            followConnection:Disconnect()
+                        end
+                    end)
                 end
             end)
         end
